@@ -33,8 +33,8 @@ class ChinaETFListSpider(Recorder):
         self.logger.info('沪市 ETF 列表抓取完成...')
 
         # 抓取沪市 ETF 成分股
-        self.download_sh_etf_component(df)
-        self.logger.info('沪市 ETF 成分股抓取完成...')
+        # self.download_sh_etf_component(df)
+        # self.logger.info('沪市 ETF 成分股抓取完成...')
 
         # 抓取深市 ETF 列表
         url = 'http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1945'
@@ -45,8 +45,8 @@ class ChinaETFListSpider(Recorder):
         self.logger.info('深市 ETF 列表抓取完成...')
 
         # 抓取深市 ETF 成分股
-        self.download_sz_etf_component(df)
-        self.logger.info('深市 ETF 成分股抓取完成...')
+        # self.download_sz_etf_component(df)
+        # self.logger.info('深市 ETF 成分股抓取完成...')
 
     def persist_etf_list(self, df: pd.DataFrame, exchange: str):
         if df is None:
