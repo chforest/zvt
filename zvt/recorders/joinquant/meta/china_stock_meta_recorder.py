@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
-from jqdatapy.api import get_all_securities, run_query
+from jqdatapy.api import get_all_securities, run_query, get_token
 from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
@@ -9,6 +9,7 @@ from zvt.domain import EtfStock, Stock, Etf, StockDetail
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str
+from zvt import zvt_env
 
 
 class BaseJqChinaMetaRecorder(Recorder):
@@ -16,6 +17,7 @@ class BaseJqChinaMetaRecorder(Recorder):
 
     def __init__(self, batch_size=10, force_update=True, sleeping_time=10) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
+        get_token(zvt_env['jq_username'], zvt_env['jq_password'], force=True)
 
     def to_zvt_entity(self, df, entity_type, category=None):
         df = df.set_index('code')
