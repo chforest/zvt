@@ -451,6 +451,7 @@ def df_to_db(df: pd.DataFrame,
             if pd_is_not_null(current):
                 df_current = df_current[~df_current['id'].isin(current['id'])]
 
+        print('Save {0} row into db'.format(len(df_current)))
         df_current.to_sql(data_schema.__tablename__, db_engine, index=False, if_exists='append')
 
 

@@ -59,7 +59,6 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
         self.adjust_type = adjust_type
         ts.set_token(zvt_env['tushare_access_token'])
 
-
     def generate_domain_id(self, entity, original_data):
         return generate_kdata_id(entity_id=entity.id, timestamp=original_data['timestamp'], level=self.level)
 
@@ -90,9 +89,9 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
         if end is None:
             end = datetime.now()
 
-        latest_record = self.get_latest_saved_record(entity)
-        if (latest_record is not None) and (latest_record.timestamp == start):
-            return None
+        # latest_record = self.get_latest_saved_record(entity)
+        # if (latest_record is not None) and (latest_record.timestamp == start):
+        #     return None
 
         # tushare限制调用一次返回的数据长度不超过5000，无法一次性获取全部
         # 因为每次调用的时间不一样，导致需要重新计算复权价
