@@ -27,6 +27,11 @@ TIME_FORMAT_MINUTE2 = "YYYY-MM-DD HH:mm:ss"
 def to_pd_timestamp(the_time):
     if the_time is None:
         return None
+
+    # workaround for exchange stock list, list date: 670636800000000000
+    if type(the_time) == str and ('-' not in the_time) and len(the_time) >= len('600000000000000000'):
+        the_time = int(the_time[0:len(the_time) - 6])
+
     if type(the_time) == int:
         return pd.Timestamp.fromtimestamp(the_time / 1000)
 
