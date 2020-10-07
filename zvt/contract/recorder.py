@@ -392,12 +392,13 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                         self.on_finish_entity(entity_item)
                         continue
 
-                    # sleep for a while to next entity
-                    if index != 0:
-                        self.sleep()
-
                     original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                                 timestamps=timestamps)
+
+                    if original_list:
+                        # sleep for a while to next entity
+                        if index != 0:
+                            self.sleep()
 
                     all_duplicated = True
 

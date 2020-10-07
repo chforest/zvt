@@ -40,11 +40,22 @@ def to_ts_adj(adjust_type):
 
 
 def to_ts_entity_id(security_item):
-    if security_item.entity_type == 'stock' or security_item.entity_type == 'index':
+    if security_item.entity_type == 'stock' or security_item.entity_type == 'etf':
         if security_item.exchange == 'sh':
-            return '{}.SG'.format(security_item.code)
+            return '{}.SH'.format(security_item.code)
         if security_item.exchange == 'sz':
             return '{}.SZ'.format(security_item.code)
+    elif security_item.entity_type == 'index':
+        if security_item.code[0] == '0':
+            return '{}.SH'.format(security_item.code)
+        elif security_item.code[0] == '3':
+            return '{}.SZ'.format(security_item.code)
+        elif security_item.code[0] == '9':
+            return '{}.CSI'.format(security_item.code)
+        else:
+            raise ValueError("Not support!")
+    else:
+        raise ValueError("Not support!")
 
 
 def to_entity_id(jq_code: str, entity_type):

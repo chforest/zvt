@@ -23,18 +23,18 @@ ENTITY_K_DATA_STATUS_UNKNOWN = 1          # 未知
 ENTITY_K_DATA_STATUS_UP_TO_DATE = 2       # 最新
 ENTITY_K_DATA_STATUS_OUT_OF_DATE = 3      # 过时
 
+"""
+entity_type: stock/etf/index
+"""
 
-class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
-    entity_provider = 'exchange'
-    entity_schema = Stock
+
+class TushareBaseKdataRecorder(FixedCycleDataRecorder):
 
     # 数据来自jq
     provider = 'ts'
 
-    # 只是为了把recorder注册到data_schema
-    data_schema = StockKdataCommon
-
     def __init__(self,
+                 entity_type='stock',
                  exchanges=['sh', 'sz'],
                  entity_ids=None,
                  codes=None,
@@ -46,7 +46,7 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
                  fix_duplicate_way='ignore',
                  start_timestamp=None,
                  end_timestamp=None,
-                 level=IntervalLevel.LEVEL_1WEEK,
+                 level=IntervalLevel.LEVEL_1DAY,
                  kdata_use_begin_time=False,
                  close_hour=15,
                  close_minute=0,
@@ -54,15 +54,24 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
                  adjust_type=AdjustType.qfq) -> None:
         level = IntervalLevel(level)
         adjust_type = AdjustType(adjust_type)
-        self.data_schema = get_kdata_schema(entity_type='stock', level=level, adjust_type=adjust_type)
+        self.entity_type = entity_type
+        self.data_schema = get_kdata_schema(entity_type=entity_type, level=level, adjust_type=adjust_type)
         self.ts_trading_level = to_ts_trading_level(level)
 
-        super().__init__('stock', exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
+        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, level, kdata_use_begin_time, one_day_trading_minutes)
         self.adjust_type = adjust_type
         ts.set_token(zvt_env['tushare_access_token'])
 
+        if entity_type == 'stock':
+            self.asset = 'E'
+        elif entity_type == 'etf':
+            self.asset = 'FD'
+        elif entity_type == 'index':
+            self.asset = 'I'
+        else:
+            raise ValueError("Invalid entity type: {0}".format(entity_type))
         # 数据是否为最新，如果是最新数据，则不调用Tushare API，加速同步
         # 判断标准：有一条记录和调用API获取的值一致，则认为当前是最新数据
         self.entity_k_data_status = ENTITY_K_DATA_STATUS_UNKNOWN
@@ -101,7 +110,21 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
             return True
         return False
 
+    def get_ts_asset(self):
+        if self.entity_type == 'stock':
+            return 'E'
+        elif self.entity_type == 'index':
+            return 'I'
+        elif self.entity_type == 'etf':
+            return 'FD'
+        else:
+            raise ValueError("Invalid entity_type: {0}".format(self.entity_type))
+
     def record(self, entity, start, end, size, timestamps):
+        if start is None:
+            start = datetime.strptime("20050101", "%Y%m%d")
+            size = 10000
+
         ts_code = to_ts_entity_id(entity)
         adj = to_ts_adj(self.adjust_type)
         max_item_count = 4000
@@ -120,7 +143,7 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
             else:
                 start_date_str = to_ts_date(datetime.now() - timedelta(30))
                 end_date_str = to_ts_date(datetime.now())
-                df = ts.pro_bar(ts_code=ts_code, asset='E', adj=adj, start_date=start_date_str, end_date=end_date_str)
+                df = ts.pro_bar(ts_code=ts_code, asset=self.asset, adj=adj, start_date=start_date_str, end_date=end_date_str)
                 if len(df) > 0:
                     if round(latest_record.close, 3) == round(df.close[0], 3):
                         self.entity_k_data_status = ENTITY_K_DATA_STATUS_UP_TO_DATE
@@ -142,7 +165,7 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
             end_date = get_coarse_end_date(start_date, max_item_count)
             start_date_str = to_ts_date(start_date)
             end_date_str = to_ts_date(end_date)
-            df = ts.pro_bar(ts_code=ts_code, asset='E', adj=adj, start_date=start_date_str, end_date=end_date_str, adjfactor=True)
+            df = ts.pro_bar(ts_code=ts_code, asset=self.asset, adj=adj, start_date=start_date_str, end_date=end_date_str, adjfactor=True)
             if pd_is_not_null(df):
                 if pd_is_not_null(result_df):
                     # 调整复权价格: 相同时间的close不同，表明前复权需要重新计算
@@ -225,36 +248,5 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
         return None
 
 
-__all__ = ['TushareChinaStockKdataRecorder']
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--level', help='trading level', default='1d', choices=[item.value for item in IntervalLevel])
-    parser.add_argument('--codes', help='codes', default=['600050'], nargs='+')
-
-    args = parser.parse_args()
-
-    level = IntervalLevel(args.level)
-    codes = args.codes
-
-    init_log('jq_china_stock_{}_kdata.log'.format(args.level))
-    TushareChinaStockKdataRecorder(level=level, entity_ids=['stock_sh_600050'], sleeping_time=0, codes=codes, real_time=False).run()
-
-    kdata = get_kdata(entity_id='stock_sh_600050', provider='ts', limit=20000, order=Stock1dKdata.timestamp.desc(),
-                    adjust_type=AdjustType.qfq)
-    kdata = kdata[::-1]
-
-    ts.set_token(zvt_env['tushare_access_token'])
-    df_ts = ts.pro_bar(ts_code='600050.SH', asset='E', adj='qfq', start_date='19910403', end_date='20200930')
-    print('compare now!')
-
-    all_match = True
-    min_len = min( len(kdata), len(df_ts))
-    for i in range(min_len):
-        import math
-        if (not np.isnan(df_ts.iloc[i].close)) and not math.isclose(kdata.iloc[i].close, df_ts.iloc[i].close, rel_tol=1e-03, abs_tol=0.001):
-            all_match = False
-            break
-    print("all_match = {0}".format(all_match))
-
+__all__ = ['TushareBaseKdataRecorder']
 

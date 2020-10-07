@@ -19,21 +19,21 @@ from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
 import tushare as ts
 from zvt import zvt_env
-from zvt.domain import Etf, Index, Etf1dKdata, Index1dKdata
+from zvt.domain import Etf, Index, Etf1dKdata
 
 
-class TushareChinaIndexKdataRecorder(TushareBaseKdataRecorder):
+class TushareChinaEtfKdataRecorder(TushareBaseKdataRecorder):
     entity_provider = 'exchange'
-    entity_schema = Index
+    entity_schema = Etf
 
     provider = 'ts'
 
     # 只是为了把recorder注册到data_schema
-    data_schema = Index1dKdata
+    data_schema = Etf1dKdata
 
     def __init__(self,
-                 entity_type="index",
-                 exchanges=['cn'],
+                 entity_type="etf",
+                 exchanges=['sh', 'sz'],
                  entity_ids=None,
                  codes=None,
                  batch_size=10,
@@ -55,13 +55,13 @@ class TushareChinaIndexKdataRecorder(TushareBaseKdataRecorder):
                          kdata_use_begin_time, close_hour, close_minute, one_day_trading_minutes, adjust_type)
 
 
-__all__ = ['TushareChinaIndexKdataRecorder']
+__all__ = ['TushareChinaEtfKdataRecorder']
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--level', help='trading level', default='1d', choices=[item.value for item in IntervalLevel])
-    parser.add_argument('--codes', help='codes', default=['399001'], nargs='+')
+    parser.add_argument('--codes', help='codes', default=['512760'], nargs='+')
 
     args = parser.parse_args()
 
@@ -69,14 +69,14 @@ if __name__ == '__main__':
     codes = args.codes
 
     init_log('jq_china_stock_{}_kdata.log'.format(args.level))
-    TushareChinaIndexKdataRecorder(level=level, entity_ids=['index_cn_399001'], sleeping_time=0, real_time=False).run()
+    TushareChinaEtfKdataRecorder(level=level, entity_ids=['etf_sh_512760'], sleeping_time=0, codes=codes, real_time=False).run()
 
-    kdata = get_kdata(entity_id='index_cn_399001', provider='ts', limit=20000, order=Index1dKdata.timestamp.desc(),
+    kdata = get_kdata(entity_id='etf_sh_512760', provider='ts', limit=20000, order=Etf1dKdata.timestamp.desc(),
                     adjust_type=AdjustType.qfq)
     kdata = kdata[::-1]
 
     ts.set_token(zvt_env['tushare_access_token'])
-    df_ts = ts.pro_bar(ts_code='399001.SZ', asset='I', adj='qfq', start_date='19910403', end_date='20200930')
+    df_ts = ts.pro_bar(ts_code='512760.SH', asset='FD', adj='qfq', start_date='19910403', end_date='20200930')
     print('compare now!')
 
     all_match = True
