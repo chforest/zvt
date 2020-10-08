@@ -134,7 +134,9 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
             end = datetime.now()
 
         latest_record = self.get_latest_saved_record(entity)
-        print('latest_record: ', latest_record)
+        self.logger.info('latest_record: {0}'.format(latest_record))
+        if latest_record is not None:
+            self.logger.info('latest_record date: {0}'.format(latest_record.timestamp.strftime("%Y-%m-%d %H:%M:%S")))
 
         # 判断当前状态
         if self.entity_k_data_status == ENTITY_K_DATA_STATUS_UNKNOWN:
@@ -144,6 +146,7 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
                 start_date_str = to_ts_date(datetime.now() - timedelta(30))
                 end_date_str = to_ts_date(datetime.now())
                 df = ts.pro_bar(ts_code=ts_code, asset=self.asset, adj=adj, start_date=start_date_str, end_date=end_date_str)
+                self.sleep()
                 if len(df) > 0:
                     if round(latest_record.close, 3) == round(df.close[0], 3):
                         self.entity_k_data_status = ENTITY_K_DATA_STATUS_UP_TO_DATE
@@ -206,10 +209,17 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
                 else:
                     self.sleep()
             else:
+                self.sleep()
                 break
+
+        fetch_record_count = len(result_df) if result_df is not None else 0
+        self.logger.info("Fetch record count: {0}".format(fetch_record_count))
 
         df = result_df
         if pd_is_not_null(df):
+
+            self.logger.info("Save to db, latest record date: {0}".format(df.iloc[0].trade_date))
+
             df['name'] = entity.name
             df.rename(columns={'vol': 'volume', 'amount': 'turnover', 'trade_date': 'timestamp'}, inplace=True)
 

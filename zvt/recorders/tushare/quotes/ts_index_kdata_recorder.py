@@ -61,7 +61,7 @@ __all__ = ['TushareChinaIndexKdataRecorder']
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--level', help='trading level', default='1d', choices=[item.value for item in IntervalLevel])
-    parser.add_argument('--codes', help='codes', default=['399001'], nargs='+')
+    parser.add_argument('--codes', help='codes', default=['000840'], nargs='+')
 
     args = parser.parse_args()
 
@@ -69,14 +69,14 @@ if __name__ == '__main__':
     codes = args.codes
 
     init_log('jq_china_stock_{}_kdata.log'.format(args.level))
-    TushareChinaIndexKdataRecorder(level=level, entity_ids=['index_cn_399001'], sleeping_time=0, real_time=False).run()
+    TushareChinaIndexKdataRecorder(level=level, entity_ids=['index_cn_000965'], sleeping_time=0, real_time=False).run()
 
-    kdata = get_kdata(entity_id='index_cn_399001', provider='ts', limit=20000, order=Index1dKdata.timestamp.desc(),
+    kdata = get_kdata(entity_id='index_cn_000965', provider='ts', limit=20000, order=Index1dKdata.timestamp.desc(),
                     adjust_type=AdjustType.qfq)
     kdata = kdata[::-1]
 
     ts.set_token(zvt_env['tushare_access_token'])
-    df_ts = ts.pro_bar(ts_code='399001.SZ', asset='I', adj='qfq', start_date='19910403', end_date='20200930')
+    df_ts = ts.pro_bar(ts_code='000965.SH', asset='I', adj='qfq', start_date='19910403', end_date='20200930')
     print('compare now!')
 
     all_match = True
