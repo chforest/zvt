@@ -17,13 +17,17 @@ class ExchangeChinaStockListRecorder(Recorder):
     provider = 'exchange'
 
     def run(self):
+        # 主板
         url = 'http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1'
+        resp = requests.get(url, headers=DEFAULT_SH_HEADER)
+        self.download_stock_list(response=resp, exchange='sh')
 
+        # 科创板
+        url = 'http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=8'
         resp = requests.get(url, headers=DEFAULT_SH_HEADER)
         self.download_stock_list(response=resp, exchange='sh')
 
         url = 'http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.20932135244582617'
-
         resp = requests.get(url, headers=DEFAULT_SZ_HEADER)
         self.download_stock_list(response=resp, exchange='sz')
 
@@ -57,9 +61,9 @@ class ExchangeChinaStockListRecorder(Recorder):
             df['timestamp'] = df['list_date']
             df = df.dropna(axis=0, how='any')
             df = df.drop_duplicates(subset=('id'), keep='last')
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=False)
+            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=True)
             # persist StockDetail too
-            df_to_db(df=df, data_schema=StockDetail, provider=self.provider, force_update=False)
+g            df_to_db(df=df, data_schema=StockDetail, provider=self.provider, force_update=True)
             self.logger.info(df.tail())
             self.logger.info("persist stock list successs")
 
