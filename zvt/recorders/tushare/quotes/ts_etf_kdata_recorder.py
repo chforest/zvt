@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import argparse
-
+import demjson
+import requests
 import pandas as pd
 import numpy as np
 
@@ -20,6 +21,7 @@ from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY,
 import tushare as ts
 from zvt import zvt_env
 from zvt.domain import Etf, Index, Etf1dKdata
+from zvt.recorders.consts import EASTMONEY_ETF_NET_VALUE_HEADER
 
 
 class TushareChinaEtfKdataRecorder(TushareBaseKdataRecorder):
@@ -53,6 +55,58 @@ class TushareChinaEtfKdataRecorder(TushareBaseKdataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, level,
                          kdata_use_begin_time, close_hour, close_minute, one_day_trading_minutes, adjust_type)
+
+
+    def on_finish_entity(self, entity):
+        kdatas = get_kdata(entity_id=entity.id, level=IntervalLevel.LEVEL_1DAY.value,
+                           order=Etf1dKdata.timestamp.asc(),
+                           return_type='domain', session=self.session,
+                           filters=[Etf1dKdata.cumulative_net_value.is_(None)])
+
+        if kdatas and len(kdatas) > 0:
+            start = kdatas[0].timestamp
+            end = kdatas[-1].timestamp
+
+            # 从东方财富获取基金累计净值
+            df = self.fetch_cumulative_net_value(entity, start, end)
+
+            if df is not None and not df.empty:
+                for kdata in kdatas:
+                    if kdata.timestamp in df.index:
+                        kdata.cumulative_net_value = df.loc[kdata.timestamp, 'LJJZ']
+                        kdata.change_pct = df.loc[kdata.timestamp, 'JZZZL']
+                self.session.commit()
+                self.logger.info(f'{entity.code} - {entity.name}累计净值更新完成...')
+
+    def fetch_cumulative_net_value(self, security_item, start, end) -> pd.DataFrame:
+        query_url = 'http://api.fund.eastmoney.com/f10/lsjz?' \
+                    'fundCode={}&pageIndex={}&pageSize=200&startDate={}&endDate={}'
+
+        page = 1
+        df = pd.DataFrame()
+        while True:
+            url = query_url.format(security_item.code, page, to_time_str(start), to_time_str(end))
+
+            response = requests.get(url, headers=EASTMONEY_ETF_NET_VALUE_HEADER)
+            response_json = demjson.decode(response.text)
+            response_df = pd.DataFrame(response_json['Data']['LSJZList'])
+
+            # 最后一页
+            if response_df.empty:
+                break
+
+            response_df['FSRQ'] = pd.to_datetime(response_df['FSRQ'])
+            response_df['JZZZL'] = pd.to_numeric(response_df['JZZZL'], errors='coerce')
+            response_df['LJJZ'] = pd.to_numeric(response_df['LJJZ'], errors='coerce')
+            response_df = response_df.fillna(0)
+            response_df.set_index('FSRQ', inplace=True, drop=True)
+
+            df = pd.concat([df, response_df])
+            page += 1
+
+            self.sleep()
+
+        return df
 
 
 __all__ = ['TushareChinaEtfKdataRecorder']
