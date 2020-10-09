@@ -169,6 +169,7 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
             start_date_str = to_ts_date(start_date)
             end_date_str = to_ts_date(end_date)
             df = ts.pro_bar(ts_code=ts_code, asset=self.asset, adj=adj, start_date=start_date_str, end_date=end_date_str, adjfactor=True)
+            self.sleep()
             if pd_is_not_null(df):
                 if pd_is_not_null(result_df):
                     # 调整复权价格: 相同时间的close不同，表明前复权需要重新计算
@@ -206,10 +207,8 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
 
                 if self.last_trade_date == latest_date:
                     break
-                else:
-                    self.sleep()
+
             else:
-                self.sleep()
                 break
 
         fetch_record_count = len(result_df) if result_df is not None else 0

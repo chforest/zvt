@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 def get_coarse_end_date(start:datetime, days: int) -> datetime:
     trade_days = days*7/5
     end_date = start + timedelta(trade_days)
+    if end_date > datetime.now():
+        end_date = datetime.now()
     return end_date
 
 
