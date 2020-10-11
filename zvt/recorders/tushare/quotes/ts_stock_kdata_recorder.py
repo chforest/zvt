@@ -182,7 +182,9 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
                 if self.last_trade_date == latest_date:
                     break
             else:
-                break
+                # pro_bar 可能返回空，例如record传入的start为空，不知道etf起始时间，此时start_date默认2005年
+                start_date = end_date
+                # break
 
         df = result_df
         if pd_is_not_null(df):
