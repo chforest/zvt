@@ -168,6 +168,7 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
             end_date = get_coarse_end_date(start_date, max_item_count)
             start_date_str = to_ts_date(start_date)
             end_date_str = to_ts_date(end_date)
+            self.logger.info('{0}-{1}-{2}-{3}-{4}'.format(ts_code, self.asset, adj, start_date_str, end_date_str))
             df = ts.pro_bar(ts_code=ts_code, asset=self.asset, adj=adj, start_date=start_date_str, end_date=end_date_str, adjfactor=True)
             self.sleep()
             if pd_is_not_null(df):
@@ -209,7 +210,9 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
                     break
 
             else:
-                break
+                # pro_bar 可能返回空，例如record传入的start为空，不知道etf起始时间，此时start_date默认2005年
+                start_date = end_date
+                # break
 
         fetch_record_count = len(result_df) if result_df is not None else 0
         self.logger.info("Fetch record count: {0}".format(fetch_record_count))

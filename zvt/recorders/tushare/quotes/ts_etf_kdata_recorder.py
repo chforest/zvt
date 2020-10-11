@@ -116,7 +116,7 @@ __all__ = ['TushareChinaEtfKdataRecorder']
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--level', help='trading level', default='1d', choices=[item.value for item in IntervalLevel])
-    parser.add_argument('--codes', help='codes', default=['512760'], nargs='+')
+    parser.add_argument('--codes', help='codes', default=['516260'], nargs='+')
 
     args = parser.parse_args()
 
@@ -124,18 +124,19 @@ if __name__ == '__main__':
     codes = args.codes
 
     init_log('jq_china_stock_{}_kdata.log'.format(args.level))
-    TushareChinaEtfKdataRecorder(level=level, entity_ids=['etf_sh_512760'], sleeping_time=0, codes=codes, real_time=False).run()
+    TushareChinaEtfKdataRecorder(level=level, entity_ids=['etf_sh_515260'], sleeping_time=0, codes=[], real_time=False).run()
 
-    kdata = get_kdata(entity_id='etf_sh_512760', provider='ts', limit=20000, order=Etf1dKdata.timestamp.desc(),
+    kdata = get_kdata(entity_id='etf_sh_515260', provider='ts', limit=20000, order=Etf1dKdata.timestamp.desc(),
                     adjust_type=AdjustType.qfq)
     kdata = kdata[::-1]
 
     ts.set_token(zvt_env['tushare_access_token'])
-    df_ts = ts.pro_bar(ts_code='512760.SH', asset='FD', adj='qfq', start_date='19910403', end_date='20200930')
+    df_ts = ts.pro_bar(ts_code='515260.SH', asset='FD', adj='qfq', start_date='19910403', end_date='20201111')
     print('compare now!')
 
     all_match = True
     min_len = min( len(kdata), len(df_ts))
+    print(min_len)
     for i in range(min_len):
         import math
         if (not np.isnan(df_ts.iloc[i].close)) and not math.isclose(kdata.iloc[i].close, df_ts.iloc[i].close, rel_tol=1e-03, abs_tol=0.001):
