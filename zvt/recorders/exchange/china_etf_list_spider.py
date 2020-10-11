@@ -24,7 +24,8 @@ class ChinaETFListSpider(Recorder):
 
     def run(self):
         # 抓取沪市 ETF 列表
-        url = 'http://query.sse.com.cn/commonQuery.do?sqlId=COMMON_SSE_ZQPZ_ETFLB_L_NEW'
+        # TODO: 增加实时申赎货币基金，http://www.sse.com.cn/assortment/fund/list/
+        url = 'http://query.sse.com.cn/commonQuery.do?sqlId=COMMON_SSE_ZQPZ_JJLB_L'
         response = requests.get(url, headers=DEFAULT_SH_ETF_LIST_HEADER)
         response_dict = demjson.decode(response.text)
 
@@ -37,7 +38,8 @@ class ChinaETFListSpider(Recorder):
         # self.logger.info('沪市 ETF 成分股抓取完成...')
 
         # 抓取深市 ETF 列表
-        url = 'http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1945'
+        # 1105： 所有基金列表
+        url = 'http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1105'
         response = requests.get(url)
 
         df = pd.read_excel(io.BytesIO(response.content), dtype=str)
@@ -56,7 +58,7 @@ class ChinaETFListSpider(Recorder):
         if exchange == 'sh':
             df = df[['FUND_ID', 'FUND_NAME']]
         elif exchange == 'sz':
-            df = df[['证券代码', '证券简称']]
+            df = df[['基金代码', '基金简称']]
 
         df.columns = ['code', 'name']
         df['id'] = df['code'].apply(lambda code: f'etf_{exchange}_{code}')

@@ -104,6 +104,7 @@ class TushareChinaEtfKdataRecorder(TushareBaseKdataRecorder):
             df = pd.concat([df, response_df])
             page += 1
 
+            self.logger.info("fetch_cumulative_net_value, sleep!")
             self.sleep()
 
         return df

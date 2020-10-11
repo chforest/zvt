@@ -158,7 +158,7 @@ class TushareBaseKdataRecorder(FixedCycleDataRecorder):
         if self.entity_k_data_status == ENTITY_K_DATA_STATUS_UP_TO_DATE:
             # 已经是最新，则不更新，直接跳过
             if self.is_up_to_date(latest_record, start):
-                print("It is up to date!")
+                self.logger.info("It is up to date!")
                 return None
 
         # tushare限制调用一次返回的数据长度不超过5000，无法一次性获取全部

@@ -111,7 +111,7 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
             end = datetime.now()
 
         latest_record = self.get_latest_saved_record(entity)
-        print('latest_record: ', latest_record)
+        self.logger.info('latest_record: ', latest_record)
 
         # 判断当前状态
         if self.entity_k_data_status == ENTITY_K_DATA_STATUS_UNKNOWN:
@@ -132,7 +132,7 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
         if self.entity_k_data_status == ENTITY_K_DATA_STATUS_UP_TO_DATE:
             # 已经是最新，则不更新，直接跳过
             if self.is_up_to_date(latest_record, start):
-                print("It is up to date!")
+                self.logger.info("It is up to date!")
                 return None
 
         # tushare限制调用一次返回的数据长度不超过5000，无法一次性获取全部
