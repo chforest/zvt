@@ -38,14 +38,39 @@ class MarginTradingSummary(OverallBase, Mixin):
     margin_value = Column(Float)
     # 买入额
     margin_buy = Column(Float)
+    # 融资偿还额
+    margin_return = Column(Float)
 
     # 融券余额
     short_value = Column(Float)
-    # 卖出量
+    # 卖出量, 股,份,手
     short_volume = Column(Float)
 
-    # 融资融券余额
+    # 融资融券余额，元
     total_value = Column(Float)
+    # 融券余量(股,份,手)
+    short_total_value = Column(Float)
+
+
+# 沪股通/深股通，沪港通/深港通
+class HSGCrossMarketSummary(OverallBase, Mixin):
+    __tablename__ = 'hsg_cross_market_summary'
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+    name = Column(String(length=32))
+
+    # 港股通，上海（元）
+    ggt_ss_amount = Column(Float)
+    # 港股通，深圳（元）
+    ggt_sz_amount = Column(Float)
+    # 沪港通（元）
+    hgt_amount = Column(Float)
+    # 深港通（元）
+    sgt_amount = Column(Float)
+    # 北向资金（元）
+    north_total_amount = Column(Float)
+    # 南向资金（元）
+    south_total_amount = Column(Float)
 
 
 # 北向/南向成交概况
@@ -64,6 +89,6 @@ class CrossMarketSummary(OverallBase, Mixin):
     quota_daily_balance = Column(Float)
 
 
-register_schema(providers=['joinquant', 'exchange'], db_name='overall', schema_base=OverallBase)
+register_schema(providers=['ts', 'joinquant', 'exchange'], db_name='overall', schema_base=OverallBase)
 
-__all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary']
+__all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary', 'HSGCrossMarketSummary']
