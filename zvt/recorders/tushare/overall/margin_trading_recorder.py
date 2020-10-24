@@ -53,7 +53,7 @@ class MarginTradingSummaryRecorder(TimeSeriesDataRecorder):
         end_date_str = to_ts_date(end_date)
 
         pro = ts.pro_api()
-        df = pro.query('margin', start_date=start_date_str, end_date=end_date_str, exchange_id='SSE')
+        df = pro.query('margin', start_date=start_date_str, end_date=end_date_str, exchange_id=ts_code)
         print(df)
 
         json_results = []
