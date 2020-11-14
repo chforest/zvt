@@ -65,8 +65,14 @@ class StockKdataCommon(KdataCommon):
     turnover_rate = Column(Float)
 
 
+class FutureKdataCommon(KdataCommon):
+    # 涨跌幅
+    change_pct = Column(Float)
+
+
 from zvt.domain.quotes.block import *
 from zvt.domain.quotes.stock import *
 from zvt.domain.quotes.etf import *
 from zvt.domain.quotes.index import *
 from zvt.domain.quotes.trade_day import *
+from zvt.domain.quotes.future import *
