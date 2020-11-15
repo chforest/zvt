@@ -16,7 +16,7 @@ import tushare as ts
 columns = ['id', 'entity_id', 'timestamp', 'entity_type', 'exchange', 'code', 'name',  'index', 'list_date', 'end_date']
 futures = [
     # id,               entity_id,          timestamp,             entity_type, exchange,  code, name,  index, list-date, end-date
-    ['future.cboe.vix', 'future.cboe.vix',  '2001-01-04 08:00:00', 'future',    'cboe',    'vix', 'VIX恐慌指数', 'S&P500', '2001-01-04 08:00:00', None]
+    ['future_cboe_vix', 'future_cboe_vix',  '2001-01-04 08:00:00', 'future',    'cboe',    'vix', 'VIX恐慌指数', 'S&P500', '2001-01-04 08:00:00', None]
 ]
 
 
