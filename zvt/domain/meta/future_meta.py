@@ -26,7 +26,7 @@ class Future(FutureMetaBase, BaseSecurity):
     index = Column(String(length=64))
 
 
-register_schema(providers=['ts'], db_name='future_meta',
+register_schema(providers=['investing'], db_name='future_meta',
                 schema_base=FutureMetaBase)
 
 __all__ = ['Future']

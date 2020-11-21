@@ -12,7 +12,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.domain import Future, Future1dKdata
+from zvt.domain import Index, Future, Future1dKdata
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
 import tushare as ts
@@ -20,9 +20,9 @@ from zvt import zvt_env
 from zvt.recorders.investing.common import get_vix_k_data, get_k_data
 
 
-class InvestingFutureKdataRecorder(FixedCycleDataRecorder):
+class InvestingIndexKdataRecorder(FixedCycleDataRecorder):
     entity_provider = 'investing'
-    entity_schema = Future
+    entity_schema = Index
 
     # 数据来自investing
     provider = 'investing'
@@ -86,9 +86,9 @@ class InvestingFutureKdataRecorder(FixedCycleDataRecorder):
         return None
 
 
-__all__ = ['InvestingFutureKdataRecorder']
+__all__ = ['InvestingIndexKdataRecorder']
 
 if __name__ == '__main__':
-    InvestingFutureKdataRecorder(sleeping_time=0, real_time=False).run()
+    InvestingIndexKdataRecorder(sleeping_time=0, real_time=False).run()
 
 
