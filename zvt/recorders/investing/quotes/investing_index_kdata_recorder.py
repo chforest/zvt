@@ -12,7 +12,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.domain import Index, Future, Future1dKdata
+from zvt.domain import Index, Future, Future1dKdata, Index1dKdata
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
 import tushare as ts
@@ -28,7 +28,7 @@ class InvestingIndexKdataRecorder(FixedCycleDataRecorder):
     provider = 'investing'
 
     # 只是为了把recorder注册到data_schema
-    data_schema = Future1dKdata
+    data_schema = Index1dKdata
 
     def __init__(self,
                  exchanges=['global'],
@@ -69,7 +69,7 @@ class InvestingIndexKdataRecorder(FixedCycleDataRecorder):
 
             df['entity_id'] = entity.id
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['provider'] = 'ts'
+            df['provider'] = InvestingIndexKdataRecorder.provider
             df['level'] = self.level.value
             df['code'] = entity.code
 

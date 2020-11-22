@@ -69,7 +69,7 @@ class InvestingFutureKdataRecorder(FixedCycleDataRecorder):
 
             df['entity_id'] = entity.id
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['provider'] = 'ts'
+            df['provider'] = InvestingFutureKdataRecorder.provider
             df['level'] = self.level.value
             df['code'] = entity.code
 
