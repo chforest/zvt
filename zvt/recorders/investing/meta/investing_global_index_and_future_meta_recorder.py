@@ -131,6 +131,10 @@ indexs = [
     # https://cn.investing.com/indices/japan-ni225
     ['index_global_japan-ni225', 'index_global_japan-ni225', '2001-01-04 08:00:00', 'index', 'global', 'japan-ni225',
      '日经225指数','2001-01-04 08:00:00', None, None, None, None],
+
+    # https://cn.investing.com/indices/hang-sen-40
+    ['index_global_hang-sen-40', 'index_global_hang-sen-40', '2001-01-04 08:00:00', 'index', 'global', 'hang-sen-40',
+     '香港恒生指数','2001-01-04 08:00:00', None, None, None, None],
 ]
 
 
