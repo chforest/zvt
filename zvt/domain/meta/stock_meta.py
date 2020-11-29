@@ -45,6 +45,7 @@ class Block(StockMetaBase, BasePortfolio):
     __tablename__ = 'block'
 
     # 板块类型，行业(industry),概念(concept)
+    # buffert: sw_l1, sw_l2, sw_l3, jq_concept
     category = Column(String(length=64))
 
 
