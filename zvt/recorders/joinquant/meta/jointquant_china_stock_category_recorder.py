@@ -83,9 +83,9 @@ def get_record_date(start_date: date, next_i: int, all_trade_days: list):
     由于数据源的原因，start_date可能小于all_trade_days
     """
     if start_date < all_trade_days[0]:
-        return all_trade_days[0]
+        start_date = all_trade_days[0]
     elif start_date > all_trade_days[-1]:
-        return all_trade_days[-1]
+        return None
 
     index = 0
     count = len(all_trade_days)
