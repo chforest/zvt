@@ -12,7 +12,7 @@ from zvt.utils.time_utils import now_pd_timestamp
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import BlockStock, BlockCategory, Block
 from zvt import init_log, zvt_env
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 
 from jqdatasdk import auth, is_auth, get_query_count, get_industries, get_concepts, get_industry_stocks, \
@@ -37,7 +37,7 @@ class JoinquantChinaBlockRecorder(Recorder):
 
     # 用于抓取行业/概念/地域列表
     def run(self):
-        industries = ['sw_l1', 'sw_l2', 'sw_l3', 'zjw', 'jq_l1', 'jq_l2', 'concept']
+        industries = ['sw_l1', 'sw_l2', 'sw_l3', 'zjw', 'concept']
         for category in industries:
             if category != 'concept':
                 df_orig = get_industries(category)
@@ -76,6 +76,24 @@ def convert_stock_entity_id(jq_stock: str):
         return f"stock_sh_{code}"
     else:
         raise ValueError("Invalid format: {0}".format(exchange))
+
+
+def get_prev_trade_day(start_date: date, days, all_trade_days: list):
+    count = len(all_trade_days)
+    found_index = -1
+    for i in range(count-1):
+        if all_trade_days[i] == start_date:
+            found_index = i
+        elif all_trade_days[i] < start_date < all_trade_days[i + 1]:
+            found_index = i
+
+    assert found_index >= 0
+
+    if found_index < days:
+        ret = all_trade_days[0]
+    else:
+        ret = all_trade_days[found_index-days]
+    return ret
 
 
 def get_record_date(start_date: date, next_i: int, all_trade_days: list):
@@ -130,7 +148,14 @@ class JoinquantChinaBlockStockRecorder(TimeSeriesDataRecorder):
         else:
             start_date = start.date()
 
-        date_type = type(start_date)
+        """
+        由于巨宽数据量的限制，每日100万条，无法抓取历史板块信息，修改策略，只抓取最近一个交易日的数据
+        
+        假设：5000个股票分属多个行业，当做5万条，100万条可以抓取20天，先测试一下，抓取5天的数据
+        """
+        if start_date < datetime.now().date() - timedelta(days=5):
+            start_date = get_prev_trade_day(datetime.now().date(), 5, self.all_trade_days)
+            self.logger.info('get_prev_trade_day: {0}-{1}'.format(5, start_date.strftime("%Y-%m-%d")))
 
         # 循环存储
         for i in range(size):
