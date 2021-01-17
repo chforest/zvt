@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, DateTime, Float
+from sqlalchemy import Column, String, DateTime, Float, Integer
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
@@ -93,6 +93,41 @@ class InstitutionalInvestorHolder(HolderBase, Mixin):
     shareholding_ratio = Column(Float)
 
 
-register_schema(providers=['eastmoney', 'joinquant'], db_name='holder', schema_base=HolderBase)
+class InstitutionalInvestorHolderOverall(HolderBase, Mixin):
+    """
+    机构投资者持股，汇总表
+    """
+    __tablename__ = 'institutional_investor_holder_overall'
 
-__all__ = ['TopTenTradableHolder', 'TopTenHolder', 'InstitutionalInvestorHolder', 'HkHolder']
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    report_period = Column(String(length=32))
+    report_date = Column(DateTime)
+
+    # 持股总数（占流通股）
+    free_shareholding_numbers = Column(Float)
+
+    # 持股比例（占流通股）
+    free_shareholding_ratio = Column(Float)
+
+    # 持股总数（占流通股）
+    total_shareholding_numbers = Column(Float)
+
+    # 持股比例（占流通股）
+    total_shareholding_ratio = Column(Float)
+
+    # 持股机构家数
+    holder_numbers = Column(Integer)
+
+    # 机构代码
+    organ_type = Column(Integer)
+
+    # 机构名称
+    organ_name = Column(String(length=32))
+
+
+
+register_schema(providers=['eastmoney', 'joinquant', 'hexun'], db_name='holder', schema_base=HolderBase)
+
+__all__ = ['TopTenTradableHolder', 'TopTenHolder', 'InstitutionalInvestorHolder', 'InstitutionalInvestorHolderOverall', 'HkHolder']

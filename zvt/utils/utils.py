@@ -30,11 +30,25 @@ def add_func_to_value(the_map, the_func):
     return the_map
 
 
+def to_int(the_str, default=None):
+    if not the_str:
+        return default
+    if the_str in none_values:
+        return None
+    return int(the_str)
+
+
 def to_float(the_str, default=None):
     if not the_str:
         return default
     if the_str in none_values:
         return None
+
+    if type(the_str) == float:
+        return the_str
+
+    if type(the_str) == int:
+        return float(the_str)
 
     if '%' in the_str:
         return pct_to_float(the_str)

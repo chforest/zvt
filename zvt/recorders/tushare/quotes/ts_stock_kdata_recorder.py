@@ -111,7 +111,7 @@ class TushareChinaStockKdataRecorder(FixedCycleDataRecorder):
             end = datetime.now()
 
         latest_record = self.get_latest_saved_record(entity)
-        self.logger.info('latest_record: ', latest_record)
+        self.logger.info('latest_record: '.format(latest_record))
 
         # 判断当前状态
         if self.entity_k_data_status == ENTITY_K_DATA_STATUS_UNKNOWN:
@@ -231,7 +231,7 @@ __all__ = ['TushareChinaStockKdataRecorder']
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--level', help='trading level', default='1d', choices=[item.value for item in IntervalLevel])
-    parser.add_argument('--codes', help='codes', default=['600050'], nargs='+')
+    parser.add_argument('--codes', help='codes', default=['601187', '002948'], nargs='+')
 
     args = parser.parse_args()
 
@@ -239,9 +239,10 @@ if __name__ == '__main__':
     codes = args.codes
 
     init_log('jq_china_stock_{}_kdata.log'.format(args.level))
-    TushareChinaStockKdataRecorder(level=level, entity_ids=['stock_sh_600050'], sleeping_time=0, codes=codes, real_time=False).run()
+    TushareChinaStockKdataRecorder(level=level, entity_ids=['stock_sh_601187', 'stock_sz_002948'], sleeping_time=1.3,
+                                   codes=codes, real_time=False).run()
 
-    kdata = get_kdata(entity_id='stock_sh_600050', provider='ts', limit=20000, order=Stock1dKdata.timestamp.desc(),
+    kdata = get_kdata(entity_id='stock_sh_601187', provider='ts', limit=20000, order=Stock1dKdata.timestamp.desc(),
                     adjust_type=AdjustType.qfq)
     kdata = kdata[::-1]
 

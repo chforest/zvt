@@ -206,3 +206,5 @@ if __name__ == '__main__':
 
     recorder = JoinquantChinaBlockStockRecorder()
     recorder.run()
+
+
