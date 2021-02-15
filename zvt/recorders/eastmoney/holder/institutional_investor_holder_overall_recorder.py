@@ -56,7 +56,7 @@ class InstitutionalInvestorHolderOverallRecorder(EastmoneyTimestampsDataRecorder
         response = requests.get(url, headers=EASTMONEY_HEADER)
         data_dict = json.loads(response.content)
 
-        self.logger.info('code = {}, message = {}'.format(data_dict['code'], data_dict['message']))
+        self.logger.info('code = {}, message = {}, report_date = {}'.format(data_dict['code'], data_dict['message'], report_date))
         if data_dict['result'] is None:
             return []
         else:
@@ -90,6 +90,7 @@ class InstitutionalInvestorHolderOverallRecorder(EastmoneyTimestampsDataRecorder
         return the_id
 
     def record(self, entity_item, start, end, size, timestamps):
+        current_dt = datetime.now()
         if timestamps:
             original_list = []
             count = 0
@@ -102,6 +103,22 @@ class InstitutionalInvestorHolderOverallRecorder(EastmoneyTimestampsDataRecorder
 
                 # CALL API to query data
                 original_data = self.query_overall_data(entity_item.code, report_date)
+
+                # 如果时间早于前1个报告期，则认为机构持股为0
+                delta = current_dt - pd.to_datetime(the_timestamp)
+                if len(original_data) == 0 and delta.days > 90:  # 90day
+                    report_date_long = pd.to_datetime(the_timestamp).strftime('%Y-%m-%d 00:00:00')
+                    original_data = [
+                        {
+                         'SECURITY_INNER_CODE': '', 'SECURITY_NAME_ABBR': '',
+                         'REPORT_DATE': report_date_long, 'ORG_TYPE': '00', 'HOULD_NUM': 0, 'TOTAL_SHARES': 0,
+                         'HOLD_VALUE': 0, 'FREESHARES_RATIO': 0., 'HOLDCHA': None, 'HOLDCHA_NUM': None,
+                         'HOLDCHA_RATIO': None, 'SECUCODE': entity_item.entity_id, 'TOTALSHARES_RATIO': None,
+                         'ORG_TYPE_NAME': '机构汇总', 'QCHANGE_RATE': 0., 'FREE_MARKET_CAP': 0,
+                         'FREE_SHARES': 0, 'SECURITY_TYPE_CODE': '', 'HOLDCHA_VALUE': None,
+                         'SECURITY_CODE': entity_item.code
+                        }
+                    ]
 
                 if original_data is not None:
                     original_list += original_data
@@ -119,6 +136,8 @@ __all__ = ['InstitutionalInvestorHolderOverallRecorder']
 
 if __name__ == '__main__':
     # init_log('top_ten_holder.log')
-
-    InstitutionalInvestorHolderOverallRecorder(sleeping_time=2.).run()
+    df = InstitutionalInvestorHolderOverall.query_data(provider="eastmoney", entity_id='stock_sh_601166')
+    print(df.tail(10))
+    # 000419: 下载不全
+    InstitutionalInvestorHolderOverallRecorder(codes=['600841'], sleeping_time=2., batch_size=200, force_update=True).run()
 
