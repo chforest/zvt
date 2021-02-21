@@ -3,11 +3,22 @@ import json
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-
+import stat
 import pandas as pd
 
 from zvt.settings import DATA_SAMPLE_ZIP_PATH, ZVT_TEST_HOME, ZVT_HOME, ZVT_TEST_DATA_PATH, ZVT_TEST_ZIP_DATA_PATH
 from zvt.utils.zip_utils import unzip
+import traceback
+
+
+def get_current_user():
+    try:
+        # pwd is unix only
+        import pwd
+        return pwd.getpwuid(os.getuid())[0]
+    except ImportError as e:
+        import getpass
+        return getpass.getuser()
 
 
 def init_log(file_name='zvt.log', log_dir=None, simple_formatter=True):
@@ -43,6 +54,17 @@ def init_log(file_name='zvt.log', log_dir=None, simple_formatter=True):
     # add the handlers to the logger
     root_logger.addHandler(fh)
     root_logger.addHandler(ch)
+
+    if os.path.exists(file_name):
+        os.chmod(file_name, stat.S_IWUSR|stat.S_IWUSR|stat.S_IWOTH|stat.S_IROTH|stat.S_IWGRP|stat.S_IRGRP)
+
+    current_user = get_current_user()
+    if current_user == 'root':
+        stack = traceback.format_stack()
+        stack_log_file_path = os.path.join(log_dir, 'stack.log')
+        with open(stack_log_file_path, "w") as f:
+            for line in stack:
+                f.write(line)
 
 
 pd.set_option('expand_frame_repr', False)
