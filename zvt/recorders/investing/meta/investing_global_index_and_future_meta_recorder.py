@@ -173,4 +173,4 @@ __all__ = ['InvestingGlobalIndexRecorder', 'InvestingGlobalFutureRecorder']
 
 if __name__ == '__main__':
     InvestingGlobalIndexRecorder().run()
-    InvestingGlobalFutureRecorder().run()
+    # InvestingGlobalFutureRecorder().run()

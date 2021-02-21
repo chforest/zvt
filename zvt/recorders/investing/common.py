@@ -97,6 +97,7 @@ def get_k_data(code):
                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063'}
 
     url = "https://cn.investing.com/indices/{0}".format(code)
+    print(url)
     response = requests.get(url=url, headers=headers)
     if response.status_code == 200:
         content = response.content.decode(encoding='utf8', errors='strict')
@@ -122,7 +123,7 @@ def get_k_data(code):
 
             url = 'https://cn.investing.com/common/modules/js_instrument_chart/api/data.php?pair_id={0}&' \
                   'pair_id_for_news={0}&chart_type=candlestick&pair_interval=86400&candle_count={1}&events=yes&' \
-                  'volume_series=yes&period=max'.format(pair_id, 500)
+                  'volume_series=yes&period=max'.format(pair_id, 100)
             print(url)
             k_data_response = requests.get(url=url, headers=headers)
             if k_data_response.status_code == 200:

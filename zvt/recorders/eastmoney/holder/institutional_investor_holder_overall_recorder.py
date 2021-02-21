@@ -83,8 +83,10 @@ class InstitutionalInvestorHolderOverallRecorder(EastmoneyTimestampsDataRecorder
     def get_original_time_field(self):
         return 'REPORT_DATE'
 
+    # Bug: ORG_TYPE_NAME 信托_1cexxxx
     def generate_domain_id(self, entity, original_data):
-        the_name = original_data.get("ORG_TYPE_NAME")
+        the_name: str = original_data.get("ORG_TYPE_NAME")
+        the_name = the_name.split('_')[0]
         timestamp = original_data[self.get_original_time_field()]
         the_id = "{}_{}_{}".format(entity.id, timestamp, the_name)
         return the_id
@@ -126,6 +128,10 @@ class InstitutionalInvestorHolderOverallRecorder(EastmoneyTimestampsDataRecorder
                 count += 1
                 if count == self.batch_size:
                     break
+
+                if count % 10 == 5:
+                    self.sleep()
+
             return original_list
 
         else:
