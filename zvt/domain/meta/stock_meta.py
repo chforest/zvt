@@ -61,6 +61,11 @@ class Index(StockMetaBase, BasePortfolio):
     # 基准点数
     base_point = Column(Float)
 
+# 指数
+@register_entity(entity_type='fund')
+class Fund(StockMetaBase, BasePortfolio):
+    __tablename__ = 'fund'
+
 
 # etf
 @register_entity(entity_type='etf')
@@ -141,4 +146,4 @@ class StockDetail(StockMetaBase, BaseSecurity):
 register_schema(providers=['joinquant', 'eastmoney', 'exchange', 'sina', 'ts', 'investing'], db_name='stock_meta',
                 schema_base=StockMetaBase)
 
-__all__ = ['Stock', 'Index', 'Block', 'Etf', 'IndexStock', 'BlockStock', 'EtfStock', 'StockDetail']
+__all__ = ['Stock', 'Index', 'Block', 'Etf', 'IndexStock', 'BlockStock', 'EtfStock', 'StockDetail', 'Fund']

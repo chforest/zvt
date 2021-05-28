@@ -88,7 +88,20 @@ class CrossMarketSummary(OverallBase, Mixin):
     quota_daily = Column(Float)
     quota_daily_balance = Column(Float)
 
+# 基金申购赎回情况
+class FundTradeInfo(OverallBase, Mixin):
+    __tablename__ = 'fund_trade_info'
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+    name = Column(String(length=32))
 
-register_schema(providers=['ts', 'joinquant', 'exchange'], db_name='overall', schema_base=OverallBase)
+    fund_code = Column(String(length=32))
+    fund_name = Column(String(length=32))
+    buy_status = Column(String(length=32))
+    buy_limit = Column(Float)
+    sell_status = Column(String(length=32))
 
-__all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary', 'HSGCrossMarketSummary']
+
+register_schema(providers=['ts', 'joinquant', 'exchange', 'eastmoney'], db_name='overall', schema_base=OverallBase)
+
+__all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary', 'HSGCrossMarketSummary', 'FundTradeInfo']
