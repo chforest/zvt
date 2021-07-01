@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, Float
+from sqlalchemy import Column, String, Float, Integer
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
@@ -74,7 +74,6 @@ class HSGCrossMarketSummary(OverallBase, Mixin):
 
 
 # 北向/南向成交概况
-
 class CrossMarketSummary(OverallBase, Mixin):
     __tablename__ = 'cross_market_summary'
     provider = Column(String(length=32))
@@ -87,6 +86,22 @@ class CrossMarketSummary(OverallBase, Mixin):
     sell_volume = Column(Float)
     quota_daily = Column(Float)
     quota_daily_balance = Column(Float)
+
+
+# 港股通持股明细
+class HKHold(OverallBase, Mixin):
+    __tablename__ = 'hk_hold'
+    code = Column(String(length=32))
+    name = Column(String(length=32))
+    # 原始代码
+    original_code = Column(String(length=32))
+    # 持股数量
+    hold_volume = Column(Integer)
+    # 持股比例
+    hold_ratio = Column(Float)
+    # 类型: SH沪股通SZ深股通HK港股通
+    exchange = Column(String(length=32))
+
 
 # 基金申购赎回情况
 class FundTradeInfo(OverallBase, Mixin):
@@ -104,4 +119,4 @@ class FundTradeInfo(OverallBase, Mixin):
 
 register_schema(providers=['ts', 'joinquant', 'exchange', 'eastmoney'], db_name='overall', schema_base=OverallBase)
 
-__all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary', 'HSGCrossMarketSummary', 'FundTradeInfo']
+__all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary', 'HSGCrossMarketSummary', 'FundTradeInfo', 'HKHold']
